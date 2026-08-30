@@ -28,7 +28,7 @@ export function ActiveBadge({ active }: { active: boolean }) {
     <span
       className={cn(
         "inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
-        active ? TONE_CLASSES.success : TONE_CLASSES.muted,
+        active ? TONE_CLASSES["success"] : TONE_CLASSES["muted"],
       )}
     >
       {active ? "نشط" : "غير نشط"}
