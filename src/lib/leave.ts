@@ -291,7 +291,7 @@ export async function decideLeaveRequests(
   const { data, error } = await supabase.rpc("leave_request_decide", {
     _ids: ids,
     _action: action,
-    _reason: reason ?? null,
+    _reason: reason ?? undefined,
   });
   if (error) throw error;
   return (data as number) ?? 0;
