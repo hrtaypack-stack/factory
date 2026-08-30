@@ -40,7 +40,7 @@ export function LeaveDetailDialog({
 }: {
   request: LeaveRequestRow | null;
   session: SessionInfo;
-  requesterName?: string;
+  requesterName?: string | undefined;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
