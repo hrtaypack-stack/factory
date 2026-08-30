@@ -1,5 +1,4 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { createFileRoute as _unused } from "@tanstack/react-router";
 import { RequireRole } from "@/components/common/require-role";
 import { EmptyState } from "@/components/common/states";
 
