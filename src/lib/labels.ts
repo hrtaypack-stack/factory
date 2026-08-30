@@ -11,11 +11,11 @@ export const ROLE_LABELS: Record<AppRole, string> = {
 };
 
 export const STATUS_LABELS: Record<RequestStatus, string> = {
-  pending_manager: "بانتظار موافقة المدير",
-  pending_hr: "بانتظار موافقة الموارد البشرية",
-  approved: "معتمد",
-  rejected: "مرفوض",
-  cancelled: "ملغي",
+  pending_manager: "بانتظار اعتماد المدير",
+  pending_hr: "بانتظار اعتماد الإدارة",
+  approved: "موافق عليها",
+  rejected: "مرفوضة",
+  cancelled: "ملغاة",
 };
 
 export const STATUS_TONE: Record<RequestStatus, "warning" | "info" | "success" | "destructive" | "muted"> = {
