@@ -82,12 +82,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { title: "نظام الإجازات والعمل الإضافي" },
       {
         name: "description",
-        content: "نظام إدارة إجازات وعمل إضافي للعاملين بالمصنع مع سير موافقات واضح.",
+        content: "نظام إدارة إجازات وعمل إضافي للعاملين بالمصنع.",
       },
       { property: "og:title", content: "نظام الإجازات والعمل الإضافي" },
       {
         property: "og:description",
-        content: "نظام إدارة إجازات وعمل إضافي للعاملين بالمصنع مع سير موافقات واضح.",
+        content: "نظام إدارة إجازات وعمل إضافي للعاملين بالمصنع.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
