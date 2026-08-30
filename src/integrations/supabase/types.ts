@@ -240,6 +240,7 @@ export type Database = {
         Row: {
           code: string
           created_at: string
+          description: string | null
           id: string
           is_active: boolean
           is_paid: boolean
@@ -250,6 +251,7 @@ export type Database = {
         Insert: {
           code: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           is_paid?: boolean
@@ -260,6 +262,7 @@ export type Database = {
         Update: {
           code?: string
           created_at?: string
+          description?: string | null
           id?: string
           is_active?: boolean
           is_paid?: boolean
@@ -439,6 +442,34 @@ export type Database = {
         Returns: boolean
       }
       is_hr: { Args: never; Returns: boolean }
+      leave_initial_status: {
+        Args: { _employee_id: string }
+        Returns: Database["public"]["Enums"]["request_status"]
+      }
+      leave_request_decide: {
+        Args: { _action: string; _ids: string[]; _reason?: string }
+        Returns: number
+      }
+      leave_request_submit: {
+        Args: {
+          _employee_id: string
+          _end_date: string
+          _leave_type_id: string
+          _reason?: string
+          _start_date: string
+        }
+        Returns: string
+      }
+      leave_request_update: {
+        Args: {
+          _end_date: string
+          _id: string
+          _leave_type_id: string
+          _reason?: string
+          _start_date: string
+        }
+        Returns: string
+      }
       my_employee_id: { Args: never; Returns: string }
     }
     Enums: {
