@@ -155,7 +155,8 @@ async function matchingRequestIds(
 
   const { data, error } = await q;
   if (error) throw error;
-  return [...new Set((data ?? []).map((r: any) => r.overtime_request_id as string))];
+  const list = (data ?? []).map((r: any) => String(r.overtime_request_id));
+  return Array.from(new Set<string>(list));
 }
 
 function applyRequestFilters<T>(query: T, f: OvertimeFilters): T {
