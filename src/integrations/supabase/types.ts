@@ -279,7 +279,7 @@ export type Database = {
           hours: number | null
           id: string
           overtime_request_id: string
-          shift_code: string | null
+          shift_code: string
           updated_at: string
         }
         Insert: {
@@ -288,7 +288,7 @@ export type Database = {
           hours?: number | null
           id?: string
           overtime_request_id: string
-          shift_code?: string | null
+          shift_code: string
           updated_at?: string
         }
         Update: {
@@ -297,7 +297,7 @@ export type Database = {
           hours?: number | null
           id?: string
           overtime_request_id?: string
-          shift_code?: string | null
+          shift_code?: string
           updated_at?: string
         }
         Relationships: [
@@ -471,6 +471,22 @@ export type Database = {
         Returns: string
       }
       my_employee_id: { Args: never; Returns: string }
+      overtime_initial_status: {
+        Args: { _requester: string }
+        Returns: Database["public"]["Enums"]["request_status"]
+      }
+      overtime_request_decide: {
+        Args: { _action: string; _ids: string[]; _reason?: string }
+        Returns: number
+      }
+      overtime_request_submit: {
+        Args: { _items: Json; _notes?: string; _work_date: string }
+        Returns: string
+      }
+      overtime_request_update: {
+        Args: { _id: string; _items: Json; _notes?: string; _work_date: string }
+        Returns: string
+      }
     }
     Enums: {
       app_role: "hr" | "manager" | "supervisor" | "employee"
