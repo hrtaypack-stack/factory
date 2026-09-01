@@ -21,6 +21,7 @@ import { Route as AuthenticatedOvertimeRouteImport } from './routes/_authenticat
 import { Route as AuthenticatedReportsRouteImport } from './routes/_authenticated/reports'
 import { Route as AuthenticatedSettingsRouteImport } from './routes/_authenticated/settings'
 import { Route as AuthenticatedLeavesNewRouteImport } from './routes/_authenticated/leaves_.new'
+import { Route as AuthenticatedOvertimeNewRouteImport } from './routes/_authenticated/overtime_.new'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -81,6 +82,12 @@ const AuthenticatedLeavesNewRoute = AuthenticatedLeavesNewRouteImport.update({
   path: '/leaves/new',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+const AuthenticatedOvertimeNewRoute =
+  AuthenticatedOvertimeNewRouteImport.update({
+    id: '/overtime_/new',
+    path: '/overtime/new',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -94,6 +101,7 @@ export interface FileRoutesByFullPath {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/leaves/new': typeof AuthenticatedLeavesNewRoute
+  '/overtime/new': typeof AuthenticatedOvertimeNewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -107,6 +115,7 @@ export interface FileRoutesByTo {
   '/reports': typeof AuthenticatedReportsRoute
   '/settings': typeof AuthenticatedSettingsRoute
   '/leaves/new': typeof AuthenticatedLeavesNewRoute
+  '/overtime/new': typeof AuthenticatedOvertimeNewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -122,6 +131,7 @@ export interface FileRoutesById {
   '/_authenticated/reports': typeof AuthenticatedReportsRoute
   '/_authenticated/settings': typeof AuthenticatedSettingsRoute
   '/_authenticated/leaves_/new': typeof AuthenticatedLeavesNewRoute
+  '/_authenticated/overtime_/new': typeof AuthenticatedOvertimeNewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -137,6 +147,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/leaves/new'
+    | '/overtime/new'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -150,6 +161,7 @@ export interface FileRouteTypes {
     | '/reports'
     | '/settings'
     | '/leaves/new'
+    | '/overtime/new'
   id:
     | '__root__'
     | '/'
@@ -164,6 +176,7 @@ export interface FileRouteTypes {
     | '/_authenticated/reports'
     | '/_authenticated/settings'
     | '/_authenticated/leaves_/new'
+    | '/_authenticated/overtime_/new'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -258,6 +271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedLeavesNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/overtime_/new': {
+      id: '/_authenticated/overtime_/new'
+      path: '/overtime/new'
+      fullPath: '/overtime/new'
+      preLoaderRoute: typeof AuthenticatedOvertimeNewRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
@@ -271,6 +291,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedReportsRoute: typeof AuthenticatedReportsRoute
   AuthenticatedSettingsRoute: typeof AuthenticatedSettingsRoute
   AuthenticatedLeavesNewRoute: typeof AuthenticatedLeavesNewRoute
+  AuthenticatedOvertimeNewRoute: typeof AuthenticatedOvertimeNewRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -283,6 +304,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedReportsRoute: AuthenticatedReportsRoute,
   AuthenticatedSettingsRoute: AuthenticatedSettingsRoute,
   AuthenticatedLeavesNewRoute: AuthenticatedLeavesNewRoute,
+  AuthenticatedOvertimeNewRoute: AuthenticatedOvertimeNewRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
