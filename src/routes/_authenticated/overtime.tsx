@@ -38,6 +38,8 @@ export const Route = createFileRoute("/_authenticated/overtime")({
       },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { status?: string } =>
+    typeof s.status === "string" ? { status: s.status } : {},
   component: OvertimePage,
 });
 
@@ -76,8 +78,9 @@ function shiftsSummary(row: OvertimeRequestRow): string {
 function OvertimePage() {
   const { data: session, isPending: sessionPending, isError: sessionError, refetch } = useSession();
   const queryClient = useQueryClient();
+  const { status: initialStatus } = Route.useSearch();
 
-  const [filters, setFilters] = useState<OvertimeFilters>(EMPTY_OVERTIME_FILTERS);
+  const [filters, setFilters] = useState<OvertimeFilters>(() => ({ ...EMPTY_OVERTIME_FILTERS, status: initialStatus ?? "all" }));
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
   const [detail, setDetail] = useState<OvertimeRequestRow | null>(null);
