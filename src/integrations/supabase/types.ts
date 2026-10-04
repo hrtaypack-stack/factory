@@ -139,6 +139,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
             foreignKeyName: "employees_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: true
@@ -151,6 +165,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
           },
         ]
       }
@@ -221,6 +249,20 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "leave_requests_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
             foreignKeyName: "leave_requests_leave_type_id_fkey"
             columns: ["leave_type_id"]
             isOneToOne: false
@@ -233,6 +275,20 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "leave_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "leave_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
           },
         ]
       }
@@ -274,6 +330,7 @@ export type Database = {
       }
       overtime_request_employees: {
         Row: {
+          cost: number | null
           created_at: string
           employee_id: string
           hours: number | null
@@ -283,6 +340,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          cost?: number | null
           created_at?: string
           employee_id: string
           hours?: number | null
@@ -292,6 +350,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          cost?: number | null
           created_at?: string
           employee_id?: string
           hours?: number | null
@@ -307,6 +366,27 @@ export type Database = {
             isOneToOne: false
             referencedRelation: "employees"
             referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "overtime_request_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "overtime_request_employees_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "overtime_request_employees_overtime_request_id_fkey"
+            columns: ["overtime_request_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["request_id"]
           },
           {
             foreignKeyName: "overtime_request_employees_overtime_request_id_fkey"
@@ -381,6 +461,20 @@ export type Database = {
             referencedRelation: "employees"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "overtime_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "overtime_requests_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
         ]
       }
       profiles: {
@@ -430,10 +524,159 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      leave_report: {
+        Row: {
+          approved_at: string | null
+          created_at: string | null
+          days_count: number | null
+          department_id: string | null
+          department_name: string | null
+          employee_active: boolean | null
+          employee_code: string | null
+          employee_id: string | null
+          employee_name: string | null
+          end_date: string | null
+          hr_decided_at: string | null
+          id: string | null
+          leave_type_id: string | null
+          leave_type_name: string | null
+          manager_decided_at: string | null
+          manager_id: string | null
+          manager_name: string | null
+          reason: string | null
+          rejection_reason: string | null
+          start_date: string | null
+          status: Database["public"]["Enums"]["request_status"] | null
+          submitted_by: string | null
+          submitted_by_name: string | null
+          supervisor_id: string | null
+          supervisor_name: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "leave_requests_leave_type_id_fkey"
+            columns: ["leave_type_id"]
+            isOneToOne: false
+            referencedRelation: "leave_types"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      overtime_report: {
+        Row: {
+          approved_at: string | null
+          cost: number | null
+          created_at: string | null
+          department_id: string | null
+          department_name: string | null
+          employee_active: boolean | null
+          employee_code: string | null
+          employee_id: string | null
+          employee_name: string | null
+          hours: number | null
+          hr_decided_at: string | null
+          id: string | null
+          manager_decided_at: string | null
+          manager_id: string | null
+          manager_name: string | null
+          notes: string | null
+          rejection_reason: string | null
+          request_id: string | null
+          shift_code: string | null
+          status: Database["public"]["Enums"]["request_status"] | null
+          submitted_by: string | null
+          submitted_by_name: string | null
+          supervisor_id: string | null
+          supervisor_name: string | null
+          work_date: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "employees_department_id_fkey"
+            columns: ["department_id"]
+            isOneToOne: false
+            referencedRelation: "departments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_manager_id_fkey"
+            columns: ["manager_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "leave_report"
+            referencedColumns: ["employee_id"]
+          },
+          {
+            foreignKeyName: "employees_supervisor_id_fkey"
+            columns: ["supervisor_id"]
+            isOneToOne: false
+            referencedRelation: "overtime_report"
+            referencedColumns: ["employee_id"]
+          },
+        ]
+      }
     }
     Functions: {
       employee_in_my_scope: { Args: { _employee_id: string }; Returns: boolean }
+      employees_import: {
+        Args: { _commit?: boolean; _rows: Json; _skip_invalid?: boolean }
+        Returns: Json
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -469,6 +712,10 @@ export type Database = {
           _start_date: string
         }
         Returns: string
+      }
+      log_report_export: {
+        Args: { _filters: Json; _report: string; _row_count: number }
+        Returns: undefined
       }
       my_employee_id: { Args: never; Returns: string }
       overtime_initial_status: {

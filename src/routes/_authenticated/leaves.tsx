@@ -35,6 +35,8 @@ export const Route = createFileRoute("/_authenticated/leaves")({
       { property: "og:description", content: "متابعة طلبات الإجازات وسير الاعتماد مع بحث وتصفية دقيقة." },
     ],
   }),
+  validateSearch: (s: Record<string, unknown>): { status?: string } =>
+    typeof s.status === "string" ? { status: s.status } : {},
   component: LeavesPage,
 });
 
@@ -64,8 +66,9 @@ function CounterCard({
 function LeavesPage() {
   const { data: session, isPending: sessionPending, isError: sessionError, refetch } = useSession();
   const queryClient = useQueryClient();
+  const { status: initialStatus } = Route.useSearch();
 
-  const [filters, setFilters] = useState<LeaveFilters>(EMPTY_LEAVE_FILTERS);
+  const [filters, setFilters] = useState<LeaveFilters>(() => ({ ...EMPTY_LEAVE_FILTERS, status: initialStatus ?? "all" }));
   const [page, setPage] = useState(0);
   const [selected, setSelected] = useState<string[]>([]);
   const [detail, setDetail] = useState<LeaveRequestRow | null>(null);
