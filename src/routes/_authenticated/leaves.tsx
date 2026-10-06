@@ -36,7 +36,7 @@ export const Route = createFileRoute("/_authenticated/leaves")({
     ],
   }),
   validateSearch: (s: Record<string, unknown>): { status?: string } =>
-    typeof s.status === "string" ? { status: s.status } : {},
+    typeof s["status"] === "string" ? { status: s["status"] } : {},
   component: LeavesPage,
 });
 

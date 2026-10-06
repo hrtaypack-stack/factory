@@ -1,5 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { Switch } from "@/components/ui/switch";
+import { employeeErrorMessage } from "@/lib/employees";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
 import { RequireRole } from "@/components/common/require-role";
@@ -28,7 +31,9 @@ interface PersonRow {
   full_name: string;
   requires_manager_approval: boolean;
   is_active: boolean;
+  email: string | null;
   departments: { name: string } | null;
+  manager: { full_name: string; employee_code: string } | null;
 }
 
 function PeopleList({ role }: { role: "manager" | "supervisor" }) {
@@ -44,12 +49,25 @@ function PeopleList({ role }: { role: "manager" | "supervisor" }) {
       if (ids.length === 0) return [] as PersonRow[];
       const { data, error } = await supabase
         .from("employees")
-        .select("id, employee_code, full_name, requires_manager_approval, is_active, departments(name)")
+        .select("id, employee_code, full_name, email, requires_manager_approval, is_active, departments(name), manager:employees!employees_manager_id_fkey(full_name, employee_code)")
         .in("profile_id", ids)
         .order("full_name");
       if (error) throw error;
       return (data ?? []) as unknown as PersonRow[];
     },
+  });
+
+  const qc = useQueryClient();
+  const toggle = useMutation({
+    mutationFn: async ({ id, value }: { id: string; value: boolean }) => {
+      const { error } = await supabase.from("employees").update({ requires_manager_approval: value }).eq("id", id);
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("تم تحديث سير الموافقة");
+      qc.invalidateQueries({ queryKey: ["org-people"] });
+    },
+    onError: (e) => toast.error(employeeErrorMessage(e)),
   });
 
   if (query.isPending) return <LoadingState />;
@@ -77,10 +95,25 @@ function PeopleList({ role }: { role: "manager" | "supervisor" }) {
             </div>
             <ActiveBadge active={p.is_active} />
           </div>
+          {p.email ? <p className="mt-1 truncate text-xs text-muted-foreground" dir="ltr">{p.email}</p> : null}
           {role === "supervisor" ? (
-            <p className="mt-2 text-sm text-muted-foreground">
-              سير الموافقة: {p.requires_manager_approval ? "مشرف ← مدير ← موارد بشرية" : "مشرف ← موارد بشرية"}
-            </p>
+            <>
+              <p className="mt-1 text-sm">المدير: {p.manager ? `${p.manager.employee_code} — ${p.manager.full_name}` : "غير محدد"}</p>
+              <label className="mt-3 flex items-center justify-between gap-3 rounded-lg border p-3">
+                <span className="text-sm">
+                  يحتاج اعتماد المدير؟ <b>{p.requires_manager_approval ? "نعم" : "لا"}</b>
+                  <span className="block text-xs text-muted-foreground">
+                    {p.requires_manager_approval ? "مشرف ← مدير ← موارد بشرية" : "مشرف ← موارد بشرية"}
+                  </span>
+                </span>
+                <Switch
+                  checked={p.requires_manager_approval}
+                  disabled={toggle.isPending}
+                  onCheckedChange={(v) => toggle.mutate({ id: p.id, value: v })}
+                  aria-label="يحتاج اعتماد المدير"
+                />
+              </label>
+            </>
           ) : null}
         </li>
       ))}
@@ -132,7 +165,7 @@ function OrgPage() {
   return (
     <div className="space-y-4">
       <header>
-        <h1 className="text-xl font-bold lg:text-2xl">الهيكل التنظيمي</h1>
+        <h1 className="text-xl font-bold lg:text-2xl">المشرفون والمديرون</h1>
         <p className="mt-1 text-sm text-muted-foreground">
           الإدارات والمديرون والمشرفون، وسير الموافقة الخاص بكل مشرف.
         </p>
