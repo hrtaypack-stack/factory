@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { CalendarDays, CheckCircle2, Clock, UserCheck, UserX, Users, XCircle } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
@@ -31,7 +31,11 @@ function StatCard({
   value,
   icon: Icon,
   tone = "primary",
+  to,
+  status,
 }: {
+  to?: "/leaves" | "/overtime" | "/employees";
+  status?: string;
   label: string;
   value: number;
   icon: React.ComponentType<{ className?: string }>;
@@ -44,8 +48,8 @@ function StatCard({
     destructive: "bg-destructive/12 text-destructive",
     info: "bg-info/15 text-info",
   };
-  return (
-    <div className="surface-card flex items-center gap-3 p-4">
+  const body = (
+    <div className="surface-card flex h-full items-center gap-3 p-4 transition-colors hover:border-primary/50">
       <span className={`flex size-11 shrink-0 items-center justify-center rounded-xl ${toneClasses[tone]}`}>
         <Icon className="size-5" />
       </span>
@@ -54,6 +58,12 @@ function StatCard({
         <p className="text-2xl font-bold tabular-nums">{value}</p>
       </div>
     </div>
+  );
+  if (!to) return body;
+  return (
+    <Link to={to} search={status ? ({ status } as never) : ({} as never)} className="block rounded-xl focus-visible:ring-2 focus-visible:ring-ring">
+      {body}
+    </Link>
   );
 }
 
@@ -71,7 +81,10 @@ function DashboardPage() {
       pendingHr: await count("leave_requests", (q) => q.eq("status", "pending_hr")),
       leaveApproved: await count("leave_requests", (q) => q.eq("status", "approved")),
       leaveRejected: await count("leave_requests", (q) => q.eq("status", "rejected")),
-      overtimeTotal: await count("overtime_requests"),
+      leavePending: await count("leave_requests", (q) => q.in("status", ["pending_manager", "pending_hr"])),
+      overtimePendingManager: await count("overtime_requests", (q) => q.eq("status", "pending_manager")),
+      overtimePendingHr: await count("overtime_requests", (q) => q.eq("status", "pending_hr")),
+      overtimeApproved: await count("overtime_requests", (q) => q.eq("status", "approved")),
     }),
   });
 
