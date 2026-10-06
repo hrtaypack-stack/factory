@@ -120,50 +120,19 @@ function DashboardPage() {
         <section className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
           {(role === "hr" || role === "manager" || role === "supervisor") && (
             <>
-              <StatCard label="إجمالي الموظفين" value={stats.data.employeesTotal} icon={Users} />
-              <StatCard
-                label="الموظفون النشطون"
-                value={stats.data.employeesActive}
-                icon={UserCheck}
-                tone="success"
-              />
-              <StatCard
-                label="الموظفون غير النشطين"
-                value={stats.data.employeesInactive}
-                icon={UserX}
-                tone="destructive"
-              />
+              <StatCard label="إجمالي الموظفين" value={stats.data.employeesTotal} icon={Users} to="/employees" />
+              <StatCard label="الموظفون النشطون" value={stats.data.employeesActive} icon={UserCheck} tone="success" to="/employees" />
+              <StatCard label="الموظفون غير النشطين" value={stats.data.employeesInactive} icon={UserX} tone="destructive" to="/employees" />
             </>
           )}
-          <StatCard
-            label="بانتظار موافقة المدير"
-            value={stats.data.pendingManager}
-            icon={Clock}
-            tone="warning"
-          />
-          <StatCard
-            label="بانتظار موافقة الموارد البشرية"
-            value={stats.data.pendingHr}
-            icon={Clock}
-            tone="info"
-          />
-          <StatCard
-            label="إجازات معتمدة"
-            value={stats.data.leaveApproved}
-            icon={CheckCircle2}
-            tone="success"
-          />
-          <StatCard
-            label="إجازات مرفوضة"
-            value={stats.data.leaveRejected}
-            icon={XCircle}
-            tone="destructive"
-          />
-          <StatCard
-            label="تكليفات العمل الإضافي"
-            value={stats.data.overtimeTotal}
-            icon={CalendarDays}
-          />
+          <StatCard label="طلبات الإجازات المعلقة" value={stats.data.leavePending} icon={Clock} tone="warning" to="/leaves" />
+          <StatCard label="إجازات بانتظار اعتماد المدير" value={stats.data.pendingManager} icon={Clock} tone="warning" to="/leaves" status="pending_manager" />
+          <StatCard label="إجازات بانتظار اعتماد الإدارة" value={stats.data.pendingHr} icon={Clock} tone="info" to="/leaves" status="pending_hr" />
+          <StatCard label="الإجازات الموافق عليها" value={stats.data.leaveApproved} icon={CheckCircle2} tone="success" to="/leaves" status="approved" />
+          <StatCard label="الإجازات المرفوضة" value={stats.data.leaveRejected} icon={XCircle} tone="destructive" to="/leaves" status="rejected" />
+          <StatCard label="عمل إضافي بانتظار اعتماد المدير" value={stats.data.overtimePendingManager} icon={CalendarDays} tone="warning" to="/overtime" status="pending_manager" />
+          <StatCard label="عمل إضافي بانتظار اعتماد الإدارة" value={stats.data.overtimePendingHr} icon={CalendarDays} tone="info" to="/overtime" status="pending_hr" />
+          <StatCard label="التكليفات الموافق عليها" value={stats.data.overtimeApproved} icon={CheckCircle2} tone="success" to="/overtime" status="approved" />
         </section>
       )}
 
