@@ -1,3 +1,4 @@
+import { safeTerm } from "@/lib/employees";
 import { supabase } from "@/integrations/supabase/client";
 import type { RequestStatus } from "@/lib/labels";
 
@@ -141,7 +142,7 @@ async function matchingRequestIds(
     )
     .limit(max);
 
-  const term = f.term.trim();
+  const term = safeTerm(f.term);
   if (term) {
     q = q.or(`full_name.ilike.%${term}%,employee_code.ilike.%${term}%`, {
       referencedTable: "employees",
