@@ -49,9 +49,13 @@ const EMPLOYEE_SELECT =
   "supervisor:employees!employees_supervisor_id_fkey(id, employee_code, full_name), " +
   "manager:employees!employees_manager_id_fkey(id, employee_code, full_name)";
 
-/** Strip characters that would break PostgREST `or()` filter syntax. */
+/**
+ * Sanitize free text before it is placed inside a PostgREST filter string.
+ * Removes every character that has syntactic meaning in `or()` / `ilike`
+ * expressions (separators, grouping, quoting, escaping, wildcards).
+ */
 export function safeTerm(t: string): string {
-  return t.trim().replace(/[,()*%]/g, " ").slice(0, 100);
+  return t.replace(/[,()*%"'\\:]/g, " ").replace(/\s+/g, " ").trim().slice(0, 100);
 }
 
 export async function fetchEmployeesAdmin(f: EmployeeFilters, page: number) {

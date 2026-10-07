@@ -1,3 +1,4 @@
+import { safeTerm } from "@/lib/employees";
 import { supabase } from "@/integrations/supabase/client";
 import type { RequestStatus } from "@/lib/labels";
 
@@ -102,7 +103,7 @@ export interface LeaveListParams extends LeaveFilters {
 
 function applyFilters<T>(query: T, f: LeaveFilters): T {
   let q = query as any;
-  const term = f.term.trim();
+  const term = safeTerm(f.term);
   if (term) {
     q = q.or(`full_name.ilike.%${term}%,employee_code.ilike.%${term}%`, {
       referencedTable: "employee",
@@ -202,7 +203,7 @@ export async function fetchSelectableEmployees(term: string) {
     .eq("is_active", true)
     .order("employee_code")
     .limit(50);
-  const t = term.trim();
+  const t = safeTerm(term);
   if (t) query = query.or(`employee_code.ilike.%${t}%,full_name.ilike.%${t}%`);
   const { data, error } = await query;
   if (error) throw error;
