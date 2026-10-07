@@ -84,12 +84,12 @@ export function LeaveDetailDialog({
   const myEmployeeId = session.employee?.id ?? null;
   const canManagerAct =
     request.status === "pending_manager" &&
-    (isHr || (!!request.manager_id && request.manager_id === myEmployeeId));
+    !!request.manager_id && request.manager_id === myEmployeeId;
   const canHrAct = request.status === "pending_hr" && isHr;
   const canDecide = canManagerAct || canHrAct;
   const mine = request.submitted_by === session.userId;
   const canEdit = isEditable(request.status) && (isHr || mine);
-  const canCancel = canEdit;
+  const canCancel = canEdit && request.status !== "rejected";
 
   return (
     <Dialog
@@ -215,7 +215,7 @@ export function LeaveDetailDialog({
                   className="h-12 text-base sm:flex-1"
                   onClick={() => setMode("edit")}
                 >
-                  تعديل
+                  {request.status === "rejected" ? "تعديل وإعادة التقديم" : "تعديل"}
                 </Button>
               ) : null}
               {canCancel ? (

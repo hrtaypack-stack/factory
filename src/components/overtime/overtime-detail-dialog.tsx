@@ -73,7 +73,7 @@ export function OvertimeDetailDialog({
   const myEmployeeId = session.employee?.id ?? null;
   const canManagerAct =
     request.status === "pending_manager" &&
-    (isHr || (!!request.manager_id && request.manager_id === myEmployeeId));
+    !!request.manager_id && request.manager_id === myEmployeeId;
   const canHrAct = request.status === "pending_hr" && isHr;
   const canDecide = canManagerAct || canHrAct;
   const mine = request.submitted_by === session.userId;

@@ -84,7 +84,7 @@ export const HR_ACTIONABLE: RequestStatus[] = ["pending_hr"];
 /** Statuses a manager may act on. */
 export const MANAGER_ACTIONABLE: RequestStatus[] = ["pending_manager"];
 /** Statuses that still allow editing/cancelling by the submitter. */
-export const EDITABLE_STATUSES: RequestStatus[] = ["pending_manager", "pending_hr"];
+export const EDITABLE_STATUSES: RequestStatus[] = ["pending_manager", "pending_hr", "rejected"];
 
 export function isEditable(status: RequestStatus): boolean {
   return EDITABLE_STATUSES.includes(status);
