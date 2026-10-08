@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/common/states
 import { ActiveBadge } from "@/components/common/status-badge";
 import { RequireRole } from "@/components/common/require-role";
 import { useSession } from "@/hooks/use-session";
+import { ROLE_LABELS, type AppRole } from "@/lib/labels";
 import {
   EMPLOYEE_PAGE_SIZE,
   EMPTY_EMPLOYEE_FILTERS,
@@ -100,6 +101,7 @@ function EmployeesPage() {
   const [term, setTerm] = useState("");
   const [page, setPage] = useState(0);
   const [editing, setEditing] = useState<EmployeeAdminRow | "new" | null>(null);
+  const [prefill, setPrefill] = useState<AccountPrefill | null>(null);
   const opts = useOrgOptions();
 
   // debounce the search box so each keystroke doesn't hit the database
@@ -147,6 +149,15 @@ function EmployeesPage() {
           </div>
         ) : null}
       </header>
+
+      {isHr ? (
+        <UnlinkedAccounts
+          onComplete={(a) => {
+            setPrefill(a);
+            setEditing("new");
+          }}
+        />
+      ) : null}
 
       <div className="surface-card space-y-3 p-4">
         <div className="relative">
@@ -290,7 +301,11 @@ function EmployeesPage() {
       {editing ? (
         <EmployeeDialog
           employee={editing === "new" ? null : editing}
-          onClose={() => setEditing(null)}
+          prefill={editing === "new" ? prefill : null}
+          onClose={() => {
+            setEditing(null);
+            setPrefill(null);
+          }}
           departments={opts.departments}
           supervisors={opts.supervisors}
           managers={opts.managers}
@@ -302,12 +317,14 @@ function EmployeesPage() {
 
 function EmployeeDialog({
   employee,
+  prefill,
   onClose,
   departments,
   supervisors,
   managers,
 }: {
   employee: EmployeeAdminRow | null;
+  prefill?: AccountPrefill | null;
   onClose: () => void;
   departments: { id: string; name: string }[];
   supervisors: PersonRef[];
@@ -316,8 +333,8 @@ function EmployeeDialog({
   const qc = useQueryClient();
   const [form, setForm] = useState({
     employee_code: employee?.employee_code ?? "",
-    full_name: employee?.full_name ?? "",
-    email: employee?.email ?? "",
+    full_name: employee?.full_name ?? prefill?.full_name ?? "",
+    email: employee?.email ?? prefill?.email ?? "",
     job_title: employee?.job_title ?? "",
     department_id: employee?.department_id ?? NONE,
     supervisor_id: employee?.supervisor_id ?? NONE,
@@ -350,6 +367,7 @@ function EmployeeDialog({
         is_active: form.is_active,
         requires_manager_approval: form.requires_manager_approval,
         ...(form.unlink ? { profile_id: null } : {}),
+        ...(!employee && prefill ? { profile_id: prefill.user_id } : {}),
       };
       const { error: e } = employee
         ? await supabase.from("employees").update(payload).eq("id", employee.id)
@@ -360,6 +378,8 @@ function EmployeeDialog({
       toast.success(employee ? "تم حفظ بيانات الموظف" : "تمت إضافة الموظف");
       qc.invalidateQueries({ queryKey: ["employees-admin"] });
       qc.invalidateQueries({ queryKey: ["people-role"] });
+      qc.invalidateQueries({ queryKey: ["unlinked-accounts"] });
+      qc.invalidateQueries({ queryKey: ["org-people"] });
       qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
       onClose();
     },
@@ -457,5 +477,53 @@ function EmployeeDialog({
         </form>
       </DialogContent>
     </Dialog>
+  );
+}
+
+interface AccountPrefill {
+  user_id: string;
+  email: string;
+  full_name: string;
+}
+
+/** Sign-in accounts that exist but have no employee record yet (HR only, checked in the database). */
+function UnlinkedAccounts({ onComplete }: { onComplete: (a: AccountPrefill) => void }) {
+  const query = useQuery({
+    queryKey: ["unlinked-accounts"],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc("unlinked_accounts");
+      if (error) throw error;
+      return data ?? [];
+    },
+  });
+  if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
+  if (!query.data || query.data.length === 0) return null;
+  return (
+    <div className="surface-card space-y-2 p-4">
+      <p className="font-semibold">حسابات بدون ملف موظف ({query.data.length})</p>
+      <p className="text-xs text-muted-foreground">
+        هذه الحسابات مسجلة في النظام لكن غير مرتبطة بموظف، لذلك لا تظهر في قوائم الموظفين والمشرفين. أكمل بياناتها لربطها.
+      </p>
+      <ul className="divide-y">
+        {query.data.map((a) => (
+          <li key={a.user_id} className="flex flex-wrap items-center justify-between gap-2 py-2">
+            <span className="min-w-0">
+              <span className="block truncate text-sm font-semibold">{a.full_name || "بدون اسم"}</span>
+              <span className="block truncate text-xs text-muted-foreground" dir="ltr">{a.email}</span>
+              <span className="block text-xs text-muted-foreground">
+                {(a.roles ?? []).map((r) => ROLE_LABELS[r as AppRole]).join("، ")}
+              </span>
+            </span>
+            <Button
+              size="sm"
+              className="h-10"
+              onClick={() => onComplete({ user_id: a.user_id, email: a.email ?? "", full_name: a.full_name ?? "" })}
+            >
+              إكمال ملف الموظف
+            </Button>
+          </li>
+        ))}
+      </ul>
+    </div>
   );
 }
