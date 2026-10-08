@@ -16,3 +16,4 @@
 - HR reports read the `leave_report` / `overtime_report` views (HR-only, one row per employee for overtime) with server-side filters and pagination; exports reuse the same filters.
 - Overtime cost stays NULL until official rules exist — never compute or display an estimated cost.
 - SheetJS is loaded lazily via `src/lib/excel.ts` only; keep it out of SSR/initial bundles.
+- Accounts without an employee record are surfaced to HR via the HR-only `unlinked_accounts` RPC; HR completes them on the Employees page, which links by explicit profile_id (or email via validate_employee). Never auto-create employees from accounts — employee data must come from HR.
