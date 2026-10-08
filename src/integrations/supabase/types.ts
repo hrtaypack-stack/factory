@@ -737,6 +737,15 @@ export type Database = {
         Args: { _id: string; _items: Json; _notes?: string; _work_date: string }
         Returns: string
       }
+      unlinked_accounts: {
+        Args: never
+        Returns: {
+          email: string
+          full_name: string
+          roles: Database["public"]["Enums"]["app_role"][]
+          user_id: string
+        }[]
+      }
     }
     Enums: {
       app_role: "hr" | "manager" | "supervisor" | "employee"
