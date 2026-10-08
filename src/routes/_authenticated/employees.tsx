@@ -14,6 +14,7 @@ import { EmptyState, ErrorState, LoadingState } from "@/components/common/states
 import { ActiveBadge } from "@/components/common/status-badge";
 import { RequireRole } from "@/components/common/require-role";
 import { useSession } from "@/hooks/use-session";
+import { ROLE_LABELS, type AppRole } from "@/lib/labels";
 import {
   EMPLOYEE_PAGE_SIZE,
   EMPTY_EMPLOYEE_FILTERS,
@@ -498,7 +499,7 @@ function UnlinkedAccounts({ onComplete }: { onComplete: (a: AccountPrefill) => v
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
   if (!query.data || query.data.length === 0) return null;
   return (
-    <div className="surface-card border-warning/40 space-y-2 p-4">
+    <div className="surface-card space-y-2 p-4">
       <p className="font-semibold">حسابات بدون ملف موظف ({query.data.length})</p>
       <p className="text-xs text-muted-foreground">
         هذه الحسابات مسجلة في النظام لكن غير مرتبطة بموظف، لذلك لا تظهر في قوائم الموظفين والمشرفين. أكمل بياناتها لربطها.
