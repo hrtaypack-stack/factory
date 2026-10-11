@@ -49,7 +49,7 @@ function PeopleList({ role }: { role: "manager" | "supervisor" }) {
       if (ids.length === 0) return [] as PersonRow[];
       const { data, error } = await supabase
         .from("employees")
-        .select("id, employee_code, full_name, email, requires_manager_approval, is_active, departments(name), manager:employees!employees_manager_id_fkey(full_name, employee_code)")
+        .select("id, employee_code, full_name, email, requires_manager_approval, is_active, departments(name), manager:employees!manager_id(full_name, employee_code)")
         .in("profile_id", ids)
         .order("full_name");
       if (error) throw error;
@@ -90,7 +90,7 @@ function PeopleList({ role }: { role: "manager" | "supervisor" }) {
             <div className="min-w-0">
               <p className="truncate font-semibold">{p.full_name}</p>
               <p className="text-xs text-muted-foreground">
-                كود: {p.employee_code} — {p.departments?.name ?? "بدون إدارة"}
+                كود: {p.employee_code} — {p.departments?.name ?? "غير محدد"}
               </p>
             </div>
             <ActiveBadge active={p.is_active} />

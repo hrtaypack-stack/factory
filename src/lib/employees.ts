@@ -46,8 +46,8 @@ export const EMPLOYEE_PAGE_SIZE = 50;
 const EMPLOYEE_SELECT =
   "id, employee_code, full_name, email, job_title, is_active, requires_manager_approval, department_id, supervisor_id, manager_id, profile_id, " +
   "departments(id, name), " +
-  "supervisor:employees!employees_supervisor_id_fkey(id, employee_code, full_name), " +
-  "manager:employees!employees_manager_id_fkey(id, employee_code, full_name)";
+  "supervisor:employees!supervisor_id(id, employee_code, full_name), " +
+  "manager:employees!manager_id(id, employee_code, full_name)";
 
 /**
  * Sanitize free text before it is placed inside a PostgREST filter string.

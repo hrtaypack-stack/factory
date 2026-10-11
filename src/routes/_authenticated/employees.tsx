@@ -232,7 +232,7 @@ function EmployeesPage() {
                   <ActiveBadge active={emp.is_active} />
                 </div>
                 <dl className="mt-2 grid grid-cols-2 gap-x-3 gap-y-1 text-sm">
-                  <dt className="text-muted-foreground">القسم</dt><dd>{emp.departments?.name ?? "—"}</dd>
+                  <dt className="text-muted-foreground">القسم</dt><dd>{emp.departments?.name ?? "غير محدد"}</dd>
                   <dt className="text-muted-foreground">المشرف</dt><dd className="truncate">{emp.supervisor?.full_name ?? "—"}</dd>
                   <dt className="text-muted-foreground">المدير</dt><dd className="truncate">{emp.manager?.full_name ?? "—"}</dd>
                   <dt className="text-muted-foreground">الحساب</dt><dd>{emp.profile_id ? "مرتبط" : "بدون حساب"}</dd>
@@ -267,7 +267,7 @@ function EmployeesPage() {
                   <tr key={emp.id} className="border-t">
                     <td className="px-3 py-2.5 font-bold tabular-nums text-primary">{emp.employee_code}</td>
                     <td className="px-3 py-2.5">{emp.full_name}</td>
-                    <td className="px-3 py-2.5">{emp.departments?.name ?? "—"}</td>
+                    <td className="px-3 py-2.5">{emp.departments?.name ?? "غير محدد"}</td>
                     <td className="px-3 py-2.5">{emp.supervisor?.full_name ?? "—"}</td>
                     <td className="px-3 py-2.5">{emp.manager?.full_name ?? "—"}</td>
                     <td className="max-w-48 truncate px-3 py-2.5" dir="ltr">{emp.email ?? "—"}</td>
