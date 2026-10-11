@@ -1,7 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useState } from "react";
 import { Switch } from "@/components/ui/switch";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import { employeeErrorMessage } from "@/lib/employees";
 import { supabase } from "@/integrations/supabase/client";
 import { EmptyState, ErrorState, LoadingState } from "@/components/common/states";
@@ -136,17 +139,18 @@ function DepartmentsList() {
 
   if (query.isPending) return <LoadingState />;
   if (query.isError) return <ErrorState onRetry={() => query.refetch()} />;
-  if (query.data.length === 0)
-    return (
-      <div className="surface-card">
-        <EmptyState
-          title="لا توجد إدارات مسجلة"
-          description="ستتم إضافة إدارات المصنع مع استيراد بيانات الموظفين في المرحلة التالية."
-        />
-      </div>
-    );
 
   return (
+    <div className="space-y-3">
+      <AddDepartment />
+      {query.data.length === 0 ? (
+        <div className="surface-card">
+          <EmptyState
+            title="لا توجد إدارات مسجلة"
+            description="أضف الإدارات هنا ليمكن اختيارها في بيانات الموظفين وفي ملف الاستيراد."
+          />
+        </div>
+      ) : null}
     <ul className="space-y-3">
       {query.data.map((d) => (
         <li key={d.id} className="surface-card flex items-center justify-between gap-3 p-4">
@@ -158,6 +162,64 @@ function DepartmentsList() {
         </li>
       ))}
     </ul>
+    </div>
+  );
+}
+
+function AddDepartment() {
+  const qc = useQueryClient();
+  const [name, setName] = useState("");
+  const [code, setCode] = useState("");
+  const add = useMutation({
+    mutationFn: async () => {
+      const n = name.trim();
+      const c = code.trim();
+      if (!n || !c) throw new Error("required");
+      const { error } = await supabase.from("departments").insert({ name: n, code: c });
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      toast.success("تمت إضافة الإدارة");
+      setName("");
+      setCode("");
+      qc.invalidateQueries({ queryKey: ["departments-full"] });
+      qc.invalidateQueries({ queryKey: ["departments"] });
+      qc.invalidateQueries({ queryKey: ["org-options"] });
+    },
+    onError: (e) => {
+      const m = String((e as { message?: string })?.message ?? "");
+      const c = (e as { code?: string })?.code;
+      toast.error(
+        m === "required"
+          ? "اسم الإدارة ورمزها مطلوبان."
+          : c === "23505"
+            ? "اسم الإدارة أو رمزها مستخدم بالفعل."
+            : c === "42501"
+              ? "لا تملك صلاحية تنفيذ هذه العملية."
+              : "تعذّر حفظ الإدارة، يرجى المحاولة مرة أخرى.",
+      );
+    },
+  });
+  return (
+    <form
+      className="surface-card flex flex-wrap items-end gap-2 p-4"
+      onSubmit={(e) => {
+        e.preventDefault();
+        add.mutate();
+      }}
+    >
+      <label className="min-w-40 flex-1 text-sm">
+        اسم الإدارة
+        <Input className="mt-1 h-11" value={name} onChange={(e) => setName(e.target.value)} />
+      </label>
+      <label className="w-32 text-sm">
+        الرمز
+        <Input className="mt-1 h-11" value={code} onChange={(e) => setCode(e.target.value)} />
+      </label>
+      <Button type="submit" className="h-11" disabled={add.isPending}>
+        {add.isPending ? "جارٍ الحفظ…" : "إضافة إدارة"}
+      </Button>
+    </form>
   );
 }
 
