@@ -729,9 +729,17 @@ export type Database = {
         Args: { _action: string; _ids: string[]; _reason?: string }
         Returns: number
       }
+      overtime_request_has_scoped_employee: {
+        Args: { _request_id: string }
+        Returns: boolean
+      }
       overtime_request_submit: {
         Args: { _items: Json; _notes?: string; _work_date: string }
         Returns: string
+      }
+      overtime_request_submitted_by_me: {
+        Args: { _request_id: string }
+        Returns: boolean
       }
       overtime_request_update: {
         Args: { _id: string; _items: Json; _notes?: string; _work_date: string }
