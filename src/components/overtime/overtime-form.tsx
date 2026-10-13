@@ -75,7 +75,7 @@ export function OvertimeForm({
         employeeId: e.id,
         shiftCode: shifts[e.id] as ShiftCode,
       }));
-      const payload = { workDate, notes, items };
+      const payload = { workDate, notes: notes.trim(), items };
       if (editing) {
         await updateOvertimeRequest(request!.id, payload);
         return request!.id;
@@ -121,7 +121,13 @@ export function OvertimeForm({
     }
     mutation.mutate();
   }
-
+ if (!notes.trim()) {
+    toast.error("يجب كتابة سبب تكليف العمل الإضافي");
+    return;
+  }
+  mutation.mutate();
+}
+  
   const canSubmit = !!session.employee || session.roles.includes("hr");
 
   return (
@@ -206,18 +212,19 @@ export function OvertimeForm({
         </ul>
       ) : null}
 
-      <div className="space-y-2">
-        <Label htmlFor="ot-notes" className="text-sm">
-          ملاحظات (اختياري)
-        </Label>
-        <Textarea
-          id="ot-notes"
-          className="min-h-24 text-base"
-          value={notes}
-          onChange={(e) => setNotes(e.target.value)}
-          placeholder="سبب التكليف أو أي تفاصيل إضافية"
-        />
-      </div>
+     <div className="space-y-2">
+  <Label htmlFor="ot-notes" className="text-sm">
+    سبب تكليف العمل الإضافي <span className="text-destructive">*</span>
+  </Label>
+  <Textarea
+    id="ot-notes"
+    className="min-h-24 text-base"
+    value={notes}
+    onChange={(e) => setNotes(e.target.value)}
+    placeholder="برجاء كتابة سبب تكليف العمل الإضافي"
+    required
+  />
+</div>
 
       <div className="flex flex-col gap-2 sm:flex-row-reverse">
         <Button
