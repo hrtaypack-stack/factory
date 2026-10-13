@@ -119,8 +119,6 @@ export function OvertimeForm({
       toast.error("يرجى تحديد الوردية لكل موظف");
       return;
     }
-    mutation.mutate();
-  }
  if (!notes.trim()) {
     toast.error("يجب كتابة سبب تكليف العمل الإضافي");
     return;
