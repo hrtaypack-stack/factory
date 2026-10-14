@@ -8,7 +8,7 @@ LANGUAGE plpgsql
 SET search_path = public
 AS $$
 BEGIN
-  IF NEW.shift_code NOT IN ('shift_1','shift_2','shift_3','hours_12') THEN
+  IF NEW.shift_code NOT IN ('shift_1','shift_2','shift_3','hours_4','hours_12','hours_16') THEN
     RAISE EXCEPTION 'shift_invalid';
   END IF;
   RETURN NEW;
