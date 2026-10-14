@@ -6,14 +6,16 @@ import type { RequestStatus } from "@/lib/labels";
  * Shifts (single source of truth, mirrored by a database trigger)
  * ------------------------------------------------------------------ */
 
-export const SHIFT_CODES = ["shift_1", "shift_2", "shift_3", "hours_12"] as const;
+export const SHIFT_CODES = ["shift_1", "shift_2", "shift_3", "hours_4", "hours_12", "hours_16"] as const;
 export type ShiftCode = (typeof SHIFT_CODES)[number];
 
 export const SHIFT_LABELS: Record<ShiftCode, string> = {
   shift_1: "الوردية الأولى",
   shift_2: "الوردية الثانية",
   shift_3: "الوردية الثالثة",
+  hours_4: "٤ ساعة",
   hours_12: "١٢ ساعة",
+  hours_16: "١٦ ساعة",
 };
 
 export function shiftLabel(code: string | null): string {
