@@ -46,8 +46,16 @@ export const EMPLOYEE_PAGE_SIZE = 50;
 const EMPLOYEE_SELECT =
   "id, employee_code, full_name, email, job_title, is_active, requires_manager_approval, department_id, supervisor_id, manager_id, profile_id, " +
   "departments(id, name), " +
-  "supervisor:employees!supervisor_id(id, employee_code, full_name), " +
-  "manager:employees!manager_id(id, employee_code, full_name)";
+  "supervisor:supervisor_id(id, employee_code, full_name), " +
+  "manager:manager_id(id, employee_code, full_name)";
+
+function normalizePerson(val: unknown): PersonRef | null {
+  if (!val) return null;
+  if (Array.isArray(val)) {
+    return (val[0] as PersonRef) ?? null;
+  }
+  return val as PersonRef;
+}
 
 /**
  * Sanitize free text before it is placed inside a PostgREST filter string.
@@ -74,7 +82,12 @@ export async function fetchEmployeesAdmin(f: EmployeeFilters, page: number) {
   if (f.account === "unlinked") q = q.is("profile_id", null);
   const { data, error, count } = await q;
   if (error) throw error;
-  return { rows: (data ?? []) as EmployeeAdminRow[], total: count ?? 0 };
+  const rows = ((data ?? []) as any[]).map((r) => ({
+    ...r,
+    supervisor: normalizePerson(r.supervisor),
+    manager: normalizePerson(r.manager),
+  })) as EmployeeAdminRow[];
+  return { rows, total: count ?? 0 };
 }
 
 /** Employees whose linked account holds the given role (supervisors / managers). */
