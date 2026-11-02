@@ -1,0 +1,1 @@
+REVOKE EXECUTE ON FUNCTION public.reroute_pending_leave_route() FROM PUBLIC, anon, authenticated;
