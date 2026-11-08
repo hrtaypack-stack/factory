@@ -189,9 +189,29 @@ export async function createEmployeeAccount(payload: CreateAccountPayload) {
     const { data, error } = await supabase.functions.invoke("manage-account", {
       body: { action: "create_account", ...payload },
     });
-    if (!error && data?.success) return data;
-  } catch {
-    // continue to direct RPC
+    if (!error && (data?.success || data?.employee_id)) return data;
+    if (error) {
+      const ctx = (error as any).context;
+      if (ctx && typeof ctx.json === "function") {
+        try {
+          const body = await ctx.json();
+          if (body?.error) throw new Error(body.error);
+        } catch (e: any) {
+          if (e.message && e.message !== "[object Object]") throw e;
+        }
+      }
+    }
+  } catch (err: any) {
+    const msg = String(err?.message || "").toLowerCase();
+    if (
+      msg.includes("employee_code_exists") ||
+      msg.includes("email_exists") ||
+      msg.includes("auth_account_already_linked") ||
+      msg.includes("password_too_short") ||
+      msg.includes("forbidden")
+    ) {
+      throw err;
+    }
   }
 
   const { data, error } = await supabase.rpc("hr_create_employee_account", {

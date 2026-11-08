@@ -47,12 +47,19 @@ export const AR = {
 /** Arabic messages for common Supabase auth errors. */
 export function authErrorMessage(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes("invalid login credentials")) return "بيانات الدخول غير صحيحة";
+  if (m.includes("invalid login credentials") || m.includes("invalid_grant") || m.includes("invalid credentials")) {
+    return "بيانات الدخول غير صحيحة، يرجى التأكد من البريد الإلكتروني وكلمة المرور";
+  }
+  if (m.includes("user not found")) return "الحساب غير مسجل، يرجى التواصل مع إدارة الموارد البشرية";
+  if (m.includes("banned")) return "تم تعليق هذا الحساب، يرجى مراجعة إدارة الموارد البشرية";
+  if (m.includes("identity not found")) return "تعذر التحقق من هوية الحساب، يرجى التواصل مع مسؤول النظام";
   if (m.includes("email not confirmed")) return "لم يتم تأكيد البريد الإلكتروني بعد";
-  if (m.includes("user already registered") || m.includes("already been registered"))
+  if (m.includes("user already registered") || m.includes("already been registered")) {
     return "هذا البريد الإلكتروني مسجل بالفعل";
+  }
   if (m.includes("password should be at least")) return "كلمة المرور قصيرة جدًا (٦ أحرف على الأقل)";
-  if (m.includes("rate limit") || m.includes("too many"))
+  if (m.includes("rate limit") || m.includes("too many")) {
     return "تم تجاوز عدد المحاولات المسموح، يرجى المحاولة لاحقًا";
+  }
   return "تعذّر إتمام العملية، يرجى المحاولة مرة أخرى";
 }

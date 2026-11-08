@@ -14,7 +14,8 @@ serve(async (req: Request) => {
 
   try {
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
-    const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
+    const supabaseAnonKey =
+      Deno.env.get("SUPABASE_ANON_KEY") || Deno.env.get("SUPABASE_PUBLISHABLE_KEY");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
     if (!supabaseUrl) {
@@ -56,9 +57,9 @@ serve(async (req: Request) => {
     const body = await req.json();
     const { action, ...payload } = body;
 
-    // Use admin client with service_role if available, or fall back to user-authenticated RPC
-    const adminClient = supabaseServiceKey
-      ? createClient(supabaseUrl, supabaseServiceKey)
+    const hasServiceRole = Boolean(supabaseServiceKey);
+    const adminClient = hasServiceRole
+      ? createClient(supabaseUrl, supabaseServiceKey!)
       : userClient;
 
     let result;
@@ -93,23 +94,115 @@ serve(async (req: Request) => {
           });
         }
 
-        // Call the transactional database function
-        const { data, error } = await userClient.rpc("hr_create_employee_account", {
-          _full_name: full_name,
-          _employee_code: employee_code,
-          _email: email,
-          _password: password,
-          _role: role,
-          _department_id: department_id,
-          _job_title: job_title,
-          _supervisor_id: supervisor_id,
-          _manager_id: manager_id,
-          _requires_manager_approval: requires_manager_approval,
-          _is_active: is_active,
-        });
+        const cleanEmail = String(email).trim().toLowerCase();
+        const cleanName = String(full_name).trim();
+        const cleanCode = String(employee_code).trim();
 
-        if (error) throw error;
-        result = data;
+        if (hasServiceRole) {
+          // Standard Architecture: Use Supabase Auth Admin API
+          let authUserId: string | null = null;
+          let createdNewUser = false;
+
+          const { data: newAuthData, error: createAuthError } =
+            await adminClient.auth.admin.createUser({
+              email: cleanEmail,
+              password: password,
+              email_confirm: true,
+              user_metadata: { full_name: cleanName },
+            });
+
+          if (createAuthError) {
+            const errLower = createAuthError.message.toLowerCase();
+            if (errLower.includes("already registered") || errLower.includes("already exists")) {
+              // User already exists in Auth: check if already linked to an employee
+              const { data: userList } = await adminClient.auth.admin.listUsers();
+              const existing = userList?.users?.find(
+                (u: { email?: string }) => u.email?.toLowerCase() === cleanEmail
+              );
+              if (!existing) {
+                throw createAuthError;
+              }
+
+              const { data: existingLinkedEmp } = await adminClient
+                .from("employees")
+                .select("id")
+                .eq("profile_id", existing.id)
+                .maybeSingle();
+
+              if (existingLinkedEmp) {
+                return new Response(JSON.stringify({ error: "auth_account_already_linked" }), {
+                  status: 400,
+                  headers: { ...corsHeaders, "Content-Type": "application/json" },
+                });
+              }
+
+              // Update existing auth user password and status
+              await adminClient.auth.admin.updateUserById(existing.id, {
+                password: password,
+                user_metadata: { full_name: cleanName },
+                ban_duration: is_active ? "none" : "876000h",
+              });
+              authUserId = existing.id;
+            } else {
+              throw createAuthError;
+            }
+          } else if (newAuthData?.user) {
+            authUserId = newAuthData.user.id;
+            createdNewUser = true;
+          }
+
+          if (!authUserId) {
+            throw new Error("failed_to_resolve_auth_user");
+          }
+
+          // Complete employee record creation in PostgreSQL
+          try {
+            const { data: dbData, error: dbError } = await adminClient.rpc(
+              "hr_complete_employee_account",
+              {
+                _user_id: authUserId,
+                _employee_code: cleanCode,
+                _full_name: cleanName,
+                _email: cleanEmail,
+                _role: role,
+                _department_id: department_id || null,
+                _job_title: job_title || null,
+                _supervisor_id: supervisor_id || null,
+                _manager_id: manager_id || null,
+                _requires_manager_approval: requires_manager_approval ?? true,
+                _is_active: is_active ?? true,
+                _caller_id: userData.user.id,
+              }
+            );
+
+            if (dbError) throw dbError;
+            result = dbData;
+          } catch (dbErr) {
+            // Roll back the created Auth user if database insertion failed
+            if (createdNewUser && authUserId) {
+              await adminClient.auth.admin.deleteUser(authUserId);
+            }
+            throw dbErr;
+          }
+        } else {
+          // Fallback when service role key is not configured in environment
+          const { data, error } = await userClient.rpc("hr_create_employee_account", {
+            _full_name: cleanName,
+            _employee_code: cleanCode,
+            _email: cleanEmail,
+            _password: password,
+            _role: role,
+            _department_id: department_id || null,
+            _job_title: job_title || null,
+            _supervisor_id: supervisor_id || null,
+            _manager_id: manager_id || null,
+            _requires_manager_approval: requires_manager_approval ?? true,
+            _is_active: is_active ?? true,
+          });
+
+          if (error) throw error;
+          result = data;
+        }
         break;
       }
 
@@ -143,6 +236,23 @@ serve(async (req: Request) => {
         });
 
         if (error) throw error;
+
+        // If service role is available, sync to Auth admin
+        if (hasServiceRole) {
+          const { data: emp } = await adminClient
+            .from("employees")
+            .select("profile_id")
+            .eq("id", employee_id)
+            .maybeSingle();
+
+          if (emp?.profile_id) {
+            await adminClient.auth.admin.updateUserById(emp.profile_id, {
+              user_metadata: { full_name: String(full_name).trim() },
+              ban_duration: is_active ? "none" : "876000h",
+            });
+          }
+        }
+
         result = data;
         break;
       }
@@ -156,12 +266,29 @@ serve(async (req: Request) => {
           });
         }
 
+        // Update via DB RPC
         const { data, error } = await userClient.rpc("hr_reset_employee_password", {
           _employee_id: employee_id,
           _new_password: new_password,
         });
 
         if (error) throw error;
+
+        // If service role available, update via Auth admin API
+        if (hasServiceRole) {
+          const { data: emp } = await adminClient
+            .from("employees")
+            .select("profile_id")
+            .eq("id", employee_id)
+            .maybeSingle();
+
+          if (emp?.profile_id) {
+            await adminClient.auth.admin.updateUserById(emp.profile_id, {
+              password: new_password,
+            });
+          }
+        }
+
         result = data;
         break;
       }
@@ -174,6 +301,21 @@ serve(async (req: Request) => {
         });
 
         if (error) throw error;
+
+        if (hasServiceRole) {
+          const { data: emp } = await adminClient
+            .from("employees")
+            .select("profile_id")
+            .eq("id", employee_id)
+            .maybeSingle();
+
+          if (emp?.profile_id) {
+            await adminClient.auth.admin.updateUserById(emp.profile_id, {
+              ban_duration: is_active ? "none" : "876000h",
+            });
+          }
+        }
+
         result = data;
         break;
       }
@@ -213,4 +355,3 @@ serve(async (req: Request) => {
     );
   }
 });
-
