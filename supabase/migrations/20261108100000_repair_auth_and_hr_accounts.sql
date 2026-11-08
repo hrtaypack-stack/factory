@@ -17,7 +17,7 @@ INSERT INTO auth.identities (
   updated_at
 )
 SELECT
-  u.id::text,
+  gen_random_uuid(),
   u.id,
   jsonb_build_object('sub', u.id::text, 'email', lower(u.email), 'email_verified', true),
   'email',
