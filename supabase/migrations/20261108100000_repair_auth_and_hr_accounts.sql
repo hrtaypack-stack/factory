@@ -391,3 +391,4 @@ $$;
 
 -- Permissions
 GRANT EXECUTE ON FUNCTION public.hr_complete_employee_account TO authenticated, service_role;
+
