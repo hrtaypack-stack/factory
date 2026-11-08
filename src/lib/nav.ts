@@ -3,7 +3,7 @@ import type { AppRole } from "@/lib/labels";
 export interface NavItem {
   to: string;
   label: string;
-  icon: "dashboard" | "leave" | "overtime" | "employees" | "org" | "reports" | "settings" | "import";
+  icon: "dashboard" | "leave" | "overtime" | "employees" | "org" | "reports" | "settings" | "import" | "accounts";
   roles: AppRole[];
   /** shown in the mobile bottom bar */
   primary?: boolean;
@@ -31,6 +31,7 @@ export const NAV_ITEMS: NavItem[] = [
     roles: ["hr", "manager", "supervisor", "employee"],
     primary: true,
   },
+  { to: "/accounts", label: "إدارة الموظفين والحسابات", icon: "accounts", roles: ["hr"], primary: true },
   { to: "/employees", label: "الموظفون", icon: "employees", roles: ["hr", "manager", "supervisor"], primary: true },
   { to: "/employees-import", label: "استيراد الموظفين", icon: "import", roles: ["hr"] },
   { to: "/org", label: "المشرفون والمديرون", icon: "org", roles: ["hr"] },

@@ -11,6 +11,7 @@ import {
   Network,
   Settings,
   Upload,
+  UserCog,
   Users,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -31,6 +32,7 @@ const ICONS = {
   reports: BarChart3,
   settings: Settings,
   import: Upload,
+  accounts: UserCog,
 } as const;
 
 function NavLinks({ items, onNavigate }: { items: NavItem[]; onNavigate?: () => void }) {
