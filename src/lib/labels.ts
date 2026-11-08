@@ -18,7 +18,10 @@ export const STATUS_LABELS: Record<RequestStatus, string> = {
   cancelled: "ملغاة",
 };
 
-export const STATUS_TONE: Record<RequestStatus, "warning" | "info" | "success" | "destructive" | "muted"> = {
+export const STATUS_TONE: Record<
+  RequestStatus,
+  "warning" | "info" | "success" | "destructive" | "muted"
+> = {
   pending_manager: "warning",
   pending_hr: "info",
   approved: "success",
@@ -47,12 +50,17 @@ export const AR = {
 /** Arabic messages for common Supabase auth errors. */
 export function authErrorMessage(message: string): string {
   const m = message.toLowerCase();
-  if (m.includes("invalid login credentials") || m.includes("invalid_grant") || m.includes("invalid credentials")) {
+  if (
+    m.includes("invalid login credentials") ||
+    m.includes("invalid_grant") ||
+    m.includes("invalid credentials")
+  ) {
     return "بيانات الدخول غير صحيحة، يرجى التأكد من البريد الإلكتروني وكلمة المرور";
   }
   if (m.includes("user not found")) return "الحساب غير مسجل، يرجى التواصل مع إدارة الموارد البشرية";
   if (m.includes("banned")) return "تم تعليق هذا الحساب، يرجى مراجعة إدارة الموارد البشرية";
-  if (m.includes("identity not found")) return "تعذر التحقق من هوية الحساب، يرجى التواصل مع مسؤول النظام";
+  if (m.includes("identity not found"))
+    return "تعذر التحقق من هوية الحساب، يرجى التواصل مع مسؤول النظام";
   if (m.includes("email not confirmed")) return "لم يتم تأكيد البريد الإلكتروني بعد";
   if (m.includes("user already registered") || m.includes("already been registered")) {
     return "هذا البريد الإلكتروني مسجل بالفعل";

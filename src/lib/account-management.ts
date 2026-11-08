@@ -93,9 +93,10 @@ export async function fetchEmployeeAccounts(f: AccountFilters): Promise<AccountR
   }
 
   // Fallback query using Supabase client with RLS
-  let q: any = supabase
+  let q = supabase
     .from("employees")
-    .select(`
+    .select(
+      `
       id,
       employee_code,
       full_name,
@@ -111,11 +112,14 @@ export async function fetchEmployeeAccounts(f: AccountFilters): Promise<AccountR
       manager:manager_id(full_name),
       profile_id,
       created_at
-    `)
+    `,
+    )
     .order("employee_code");
 
   if (searchTerm) {
-    q = q.or(`employee_code.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`);
+    q = q.or(
+      `employee_code.ilike.%${searchTerm}%,full_name.ilike.%${searchTerm}%,email.ilike.%${searchTerm}%`,
+    );
   }
   if (f.departmentId !== "all") q = q.eq("department_id", f.departmentId);
   if (f.status !== "all") q = q.eq("is_active", f.status === "active");
@@ -125,8 +129,29 @@ export async function fetchEmployeeAccounts(f: AccountFilters): Promise<AccountR
   const { data: empData, error: empError } = await q;
   if (empError) throw empError;
 
-  const profileIds = (empData ?? []).map((e: any) => e.profile_id).filter(Boolean);
-  let rolesByUser: Record<string, AppRole[]> = {};
+  interface RawEmpRow {
+    id: string;
+    employee_code: string;
+    full_name: string;
+    email: string | null;
+    job_title: string | null;
+    is_active: boolean;
+    requires_manager_approval: boolean;
+    department_id: string | null;
+    departments: { name: string } | null;
+    supervisor_id: string | null;
+    supervisor: { full_name: string } | { full_name: string }[] | null;
+    manager_id: string | null;
+    manager: { full_name: string } | { full_name: string }[] | null;
+    profile_id: string | null;
+    created_at: string;
+  }
+
+  const rawEmployees = (empData ?? []) as unknown as RawEmpRow[];
+  const profileIds = rawEmployees
+    .map((e) => e.profile_id)
+    .filter((id): id is string => Boolean(id));
+  const rolesByUser: Record<string, AppRole[]> = {};
 
   if (profileIds.length > 0) {
     const { data: roleRows } = await supabase
@@ -140,7 +165,7 @@ export async function fetchEmployeeAccounts(f: AccountFilters): Promise<AccountR
     }
   }
 
-  const rows: AccountRow[] = (empData ?? []).map((e: any) => {
+  const rows: AccountRow[] = rawEmployees.map((e) => {
     const userRoles = e.profile_id ? (rolesByUser[e.profile_id] ?? ["employee"]) : [];
     const primaryRole: AppRole = userRoles.includes("hr")
       ? "hr"
@@ -161,9 +186,12 @@ export async function fetchEmployeeAccounts(f: AccountFilters): Promise<AccountR
       department_id: e.department_id,
       department_name: e.departments?.name ?? null,
       supervisor_id: e.supervisor_id,
-      supervisor_name: (Array.isArray(e.supervisor) ? e.supervisor[0]?.full_name : e.supervisor?.full_name) ?? null,
+      supervisor_name:
+        (Array.isArray(e.supervisor) ? e.supervisor[0]?.full_name : e.supervisor?.full_name) ??
+        null,
       manager_id: e.manager_id,
-      manager_name: (Array.isArray(e.manager) ? e.manager[0]?.full_name : e.manager?.full_name) ?? null,
+      manager_name:
+        (Array.isArray(e.manager) ? e.manager[0]?.full_name : e.manager?.full_name) ?? null,
       profile_id: e.profile_id,
       role: primaryRole,
       roles: userRoles,
@@ -191,18 +219,19 @@ export async function createEmployeeAccount(payload: CreateAccountPayload) {
     });
     if (!error && (data?.success || data?.employee_id)) return data;
     if (error) {
-      const ctx = (error as any).context;
+      const ctx = (error as { context?: { json?: () => Promise<{ error?: string }> } })?.context;
       if (ctx && typeof ctx.json === "function") {
         try {
           const body = await ctx.json();
           if (body?.error) throw new Error(body.error);
-        } catch (e: any) {
-          if (e.message && e.message !== "[object Object]") throw e;
+        } catch (e: unknown) {
+          const errMsg = e instanceof Error ? e.message : String(e);
+          if (errMsg && errMsg !== "[object Object]") throw e;
         }
       }
     }
-  } catch (err: any) {
-    const msg = String(err?.message || "").toLowerCase();
+  } catch (err: unknown) {
+    const msg = (err instanceof Error ? err.message : String(err)).toLowerCase();
     if (
       msg.includes("employee_code_exists") ||
       msg.includes("email_exists") ||
@@ -384,4 +413,3 @@ export function accountErrorMessage(err: unknown): string {
   }
   return "حدث خطأ أثناء معالجة الحساب، يرجى المحاولة مرة أخرى.";
 }
-

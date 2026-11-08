@@ -117,7 +117,7 @@ serve(async (req: Request) => {
               // User already exists in Auth: check if already linked to an employee
               const { data: userList } = await adminClient.auth.admin.listUsers();
               const existing = userList?.users?.find(
-                (u: { email?: string }) => u.email?.toLowerCase() === cleanEmail
+                (u: { email?: string }) => u.email?.toLowerCase() === cleanEmail,
               );
               if (!existing) {
                 throw createAuthError;
@@ -172,7 +172,7 @@ serve(async (req: Request) => {
                 _requires_manager_approval: requires_manager_approval ?? true,
                 _is_active: is_active ?? true,
                 _caller_id: userData.user.id,
-              }
+              },
             );
 
             if (dbError) throw dbError;
@@ -344,14 +344,15 @@ serve(async (req: Request) => {
       status: 200,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
-  } catch (err: any) {
-    console.error("Manage-account error:", err);
+  } catch (err: unknown) {
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("Manage-account error:", message);
     return new Response(
-      JSON.stringify({ error: err.message || "internal_error", details: String(err) }),
+      JSON.stringify({ error: message || "internal_error", details: String(err) }),
       {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
-      }
+      },
     );
   }
 });

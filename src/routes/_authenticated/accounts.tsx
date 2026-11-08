@@ -21,7 +21,13 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   Dialog,
   DialogContent,
@@ -74,13 +80,18 @@ const NONE = "none";
 function RoleBadge({ role }: { role: AppRole }) {
   const styles: Record<AppRole, string> = {
     hr: "bg-purple-100 text-purple-800 dark:bg-purple-950/60 dark:text-purple-300 border-purple-200 dark:border-purple-800",
-    manager: "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800",
-    supervisor: "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800",
-    employee: "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
+    manager:
+      "bg-blue-100 text-blue-800 dark:bg-blue-950/60 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+    supervisor:
+      "bg-amber-100 text-amber-800 dark:bg-amber-950/60 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+    employee:
+      "bg-slate-100 text-slate-800 dark:bg-slate-800 dark:text-slate-300 border-slate-200 dark:border-slate-700",
   };
 
   return (
-    <span className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold ${styles[role] || styles.employee}`}>
+    <span
+      className={`inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs font-semibold ${styles[role] || styles.employee}`}
+    >
       {ROLE_LABELS[role] || "موظف"}
     </span>
   );
@@ -95,7 +106,12 @@ function AccountsPage() {
   const [linkModalAccount, setLinkModalAccount] = useState<AccountRow | null>(null);
 
   // Queries
-  const { data: accounts = [], isLoading, isError, refetch } = useQuery({
+  const {
+    data: accounts = [],
+    isLoading,
+    isError,
+    refetch,
+  } = useQuery({
     queryKey: ["employee-accounts", filters],
     queryFn: () => fetchEmployeeAccounts(filters),
   });
@@ -148,7 +164,8 @@ function AccountsPage() {
             إدارة الموظفين والحسابات
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            إنشاء حسابات الموظفين والمشرفين والمديرين، وتعيين الصلاحيات وكلمات المرور والتدرج الإداري.
+            إنشاء حسابات الموظفين والمشرفين والمديرين، وتعيين الصلاحيات وكلمات المرور والتدرج
+            الإداري.
           </p>
         </div>
         <Button
@@ -243,13 +260,11 @@ function AccountsPage() {
         </div>
 
         <div className="flex items-center justify-between text-sm text-muted-foreground pt-1">
-          <span>عدد الموظفين: <b className="text-foreground">{accounts.length}</b></span>
+          <span>
+            عدد الموظفين: <b className="text-foreground">{accounts.length}</b>
+          </span>
           {dirty ? (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setFilters(EMPTY_ACCOUNT_FILTERS)}
-            >
+            <Button variant="ghost" size="sm" onClick={() => setFilters(EMPTY_ACCOUNT_FILTERS)}>
               إعادة تعيين الفلاتر
             </Button>
           ) : null}
@@ -276,10 +291,14 @@ function AccountsPage() {
               <div key={acc.id} className="surface-card p-4 space-y-3">
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <span className="font-bold tabular-nums text-primary text-sm">{acc.employee_code}</span>
+                    <span className="font-bold tabular-nums text-primary text-sm">
+                      {acc.employee_code}
+                    </span>
                     <h3 className="font-bold text-base">{acc.full_name}</h3>
                     {acc.email ? (
-                      <p className="text-xs text-muted-foreground" dir="ltr">{acc.email}</p>
+                      <p className="text-xs text-muted-foreground" dir="ltr">
+                        {acc.email}
+                      </p>
                     ) : null}
                   </div>
                   <div className="flex flex-col items-end gap-1.5">
@@ -345,9 +364,7 @@ function AccountsPage() {
                     variant={acc.is_active ? "ghost" : "outline"}
                     size="sm"
                     className={`h-9 px-3 ${acc.is_active ? "text-destructive hover:bg-destructive/10" : "text-success hover:bg-success/10"}`}
-                    onClick={() =>
-                      toggleStatusMut.mutate({ id: acc.id, active: !acc.is_active })
-                    }
+                    onClick={() => toggleStatusMut.mutate({ id: acc.id, active: !acc.is_active })}
                     disabled={toggleStatusMut.isPending}
                   >
                     <Power className="size-3.5" />
@@ -377,12 +394,20 @@ function AccountsPage() {
               <tbody className="divide-y divide-border">
                 {accounts.map((acc) => (
                   <tr key={acc.id} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-3 py-3 font-bold tabular-nums text-primary">{acc.employee_code}</td>
+                    <td className="px-3 py-3 font-bold tabular-nums text-primary">
+                      {acc.employee_code}
+                    </td>
                     <td className="px-3 py-3 font-semibold">{acc.full_name}</td>
-                    <td className="px-3 py-3 text-xs" dir="ltr">{acc.email || "—"}</td>
+                    <td className="px-3 py-3 text-xs" dir="ltr">
+                      {acc.email || "—"}
+                    </td>
                     <td className="px-3 py-3">{acc.department_name || "—"}</td>
-                    <td className="px-3 py-3"><RoleBadge role={acc.role} /></td>
-                    <td className="px-3 py-3 text-muted-foreground">{acc.supervisor_name || "—"}</td>
+                    <td className="px-3 py-3">
+                      <RoleBadge role={acc.role} />
+                    </td>
+                    <td className="px-3 py-3 text-muted-foreground">
+                      {acc.supervisor_name || "—"}
+                    </td>
                     <td className="px-3 py-3 text-muted-foreground">{acc.manager_name || "—"}</td>
                     <td className="px-3 py-3">
                       {acc.profile_id ? (
@@ -395,7 +420,9 @@ function AccountsPage() {
                         </span>
                       )}
                     </td>
-                    <td className="px-3 py-3"><ActiveBadge active={acc.is_active} /></td>
+                    <td className="px-3 py-3">
+                      <ActiveBadge active={acc.is_active} />
+                    </td>
                     <td className="px-3 py-3">
                       <div className="flex items-center justify-center gap-1">
                         <Button
@@ -479,10 +506,7 @@ function AccountsPage() {
 
       {/* Link Account Modal */}
       {linkModalAccount ? (
-        <LinkAccountDialog
-          account={linkModalAccount}
-          onClose={() => setLinkModalAccount(null)}
-        />
+        <LinkAccountDialog account={linkModalAccount} onClose={() => setLinkModalAccount(null)} />
       ) : null}
     </div>
   );
@@ -518,7 +542,7 @@ function AccountFormDialog({
   const [supervisorId, setSupervisorId] = useState(account?.supervisor_id || NONE);
   const [managerId, setManagerId] = useState(account?.manager_id || NONE);
   const [requiresManagerApproval, setRequiresManagerApproval] = useState(
-    account ? account.requires_manager_approval : true
+    account ? account.requires_manager_approval : true,
   );
   const [isActive, setIsActive] = useState(account ? account.is_active : true);
 
@@ -794,13 +818,7 @@ function AccountFormDialog({
  * Dialog 2: Reset Password Modal
  * ------------------------------------------------------------------ */
 
-function ResetPasswordDialog({
-  account,
-  onClose,
-}: {
-  account: AccountRow;
-  onClose: () => void;
-}) {
+function ResetPasswordDialog({ account, onClose }: { account: AccountRow; onClose: () => void }) {
   const [newPassword, setNewPassword] = useState("");
   const mutation = useMutation({
     mutationFn: () => resetEmployeePassword(account.id, newPassword),
@@ -863,13 +881,7 @@ function ResetPasswordDialog({
  * Dialog 3: Link Account Modal
  * ------------------------------------------------------------------ */
 
-function LinkAccountDialog({
-  account,
-  onClose,
-}: {
-  account: AccountRow;
-  onClose: () => void;
-}) {
+function LinkAccountDialog({ account, onClose }: { account: AccountRow; onClose: () => void }) {
   const qc = useQueryClient();
   const [selectedUserId, setSelectedUserId] = useState<string>("");
   const [selectedRole, setSelectedRole] = useState<AppRole>(account.role || "employee");
@@ -899,7 +911,8 @@ function LinkAccountDialog({
             <Link2 className="size-5 text-primary" /> ربط ملف الموظف بحساب مسجل
           </DialogTitle>
           <DialogDescription>
-            ربط ملف الموظف <b>{account.full_name}</b> ({account.employee_code}) بحساب مسجل غير مرتبط.
+            ربط ملف الموظف <b>{account.full_name}</b> ({account.employee_code}) بحساب مسجل غير
+            مرتبط.
           </DialogDescription>
         </DialogHeader>
 
@@ -918,7 +931,8 @@ function LinkAccountDialog({
             <LoadingState />
           ) : unlinked.length === 0 ? (
             <p className="text-sm text-muted-foreground p-3 bg-muted rounded-md text-center">
-              لا توجد حسابات مسجلة غير مرتبطة حالياً. يمكنك استخدام زر "إضافة موظف جديد" لإنشاء حساب كامل.
+              لا توجد حسابات مسجلة غير مرتبطة حالياً. يمكنك استخدام زر "إضافة موظف جديد" لإنشاء حساب
+              كامل.
             </p>
           ) : (
             <>
@@ -929,7 +943,7 @@ function LinkAccountDialog({
                     <SelectValue placeholder="اختر الحساب المسجل" />
                   </SelectTrigger>
                   <SelectContent>
-                    {unlinked.map((u: any) => (
+                    {unlinked.map((u: { user_id: string; full_name: string; email: string }) => (
                       <SelectItem key={u.user_id} value={u.user_id}>
                         {u.full_name || "بدون اسم"} — {u.email}
                       </SelectItem>
@@ -971,4 +985,3 @@ function LinkAccountDialog({
     </Dialog>
   );
 }
-
