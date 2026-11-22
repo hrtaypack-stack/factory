@@ -145,6 +145,7 @@ function Report({ kind }: { kind: ReportKind }) {
           { label: "المشرف", value: (r) => r.supervisor_name },
           { label: "المدير", value: (r) => r.manager_name },
           { label: "الوردية", value: (r) => shiftLabel(r.shift_code) },
+          { label: "سبب تكليف العمل الإضافي", value: (r) => r.notes, width: 30 },
           { label: "مقدم الطلب", value: (r) => r.submitted_by_name },
           { label: "الحالة", value: (r) => STATUS_LABELS[r.status] },
           { label: "تاريخ الاعتماد", value: (r) => excelDate(r.approved_at), width: 12 },

@@ -58,6 +58,7 @@ export interface OvertimeReportRow {
   work_date: string;
   status: RequestStatus;
   shift_code: string;
+  notes: string | null;
   cost: number | null;
   created_at: string;
   approved_at: string | null;
