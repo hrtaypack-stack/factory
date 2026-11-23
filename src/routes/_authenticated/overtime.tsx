@@ -75,6 +75,10 @@ function shiftsSummary(row: OvertimeRequestRow): string {
   return [...counts.entries()].map(([code, n]) => `${shiftLabel(code)} (${n})`).join(" — ");
 }
 
+function includesEmployee(row: OvertimeRequestRow, employeeId: string | null): boolean {
+  return !!employeeId && row.overtime_request_employees.some((line) => line.employee_id === employeeId);
+}
+
 function OvertimePage() {
   const { data: session, isPending: sessionPending, isError: sessionError, refetch } = useSession();
   const queryClient = useQueryClient();
@@ -111,7 +115,11 @@ function OvertimePage() {
   const rows = list.data?.rows ?? [];
   const total = list.data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / OVERTIME_PAGE_SIZE));
-  const eligibleOnPage = useMemo(() => rows.filter((r) => r.status === "pending_hr"), [rows]);
+  const myEmployeeId = session?.employee?.id ?? null;
+  const eligibleOnPage = useMemo(
+    () => rows.filter((r) => r.status === "pending_hr" && !includesEmployee(r, myEmployeeId)),
+    [rows, myEmployeeId],
+  );
   const allPageSelected =
     eligibleOnPage.length > 0 && eligibleOnPage.every((r) => selected.includes(r.id));
 
@@ -119,7 +127,11 @@ function OvertimePage() {
     mutationFn: (args: { action: "approve" | "reject"; reason?: string }) =>
       decideOvertimeRequests(selected, args.action, args.reason),
     onSuccess: (count, args) => {
-      toast.success(args.action === "approve" ? `تم اعتماد ${count} تكليف` : `تم رفض ${count} تكليف`);
+      if (args.action === "approve" && count < selected.length) {
+        toast.warning(`تم اعتماد ${count} تكليف؛ بعض التكليفات تخص حسابك أو لم تعد معلّقة.`);
+      } else {
+        toast.success(args.action === "approve" ? `تم اعتماد ${count} تكليف` : `تم رفض ${count} تكليف`);
+      }
       setSelected([]);
       setBulkApprove(false);
       setBulkReject(false);
@@ -257,7 +269,7 @@ function OvertimePage() {
                   </p>
                   {row.notes ? <p className="mt-2 text-sm">{row.notes}</p> : null}
                 </button>
-                {isHr && row.status === "pending_hr" ? (
+                {isHr && row.status === "pending_hr" && !includesEmployee(row, myEmployeeId) ? (
                   <label className="mt-3 flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={selected.includes(row.id)}
@@ -309,7 +321,7 @@ function OvertimePage() {
                       <td className="p-3">
                         <Checkbox
                           checked={selected.includes(row.id)}
-                          disabled={row.status !== "pending_hr"}
+                          disabled={row.status !== "pending_hr" || includesEmployee(row, myEmployeeId)}
                           onCheckedChange={() => toggle(row.id)}
                           aria-label="تحديد التكليف"
                         />

@@ -71,15 +71,18 @@ export function OvertimeDetailDialog({
 
   const isHr = session.roles.includes("hr");
   const myEmployeeId = session.employee?.id ?? null;
+  const lines = request.overtime_request_employees ?? [];
+  const containsOwnAssignment = !!myEmployeeId && lines.some((line) => line.employee_id === myEmployeeId);
   const canManagerAct =
     request.status === "pending_manager" &&
-    !!request.manager_id && request.manager_id === myEmployeeId;
-  const canHrAct = request.status === "pending_hr" && isHr;
+    !!request.manager_id &&
+    request.manager_id === myEmployeeId &&
+    !(isHr && containsOwnAssignment);
+  const canHrAct = request.status === "pending_hr" && isHr && !containsOwnAssignment;
   const canDecide = canManagerAct || canHrAct;
   const mine = request.submitted_by === session.userId;
   const canEdit = isOvertimeEditable(request.status) && (isHr || mine);
   const canCancel = CANCELLABLE_OVERTIME_STATUSES.includes(request.status) && (isHr || mine);
-  const lines = request.overtime_request_employees ?? [];
 
   return (
     <Dialog
@@ -109,6 +112,12 @@ export function OvertimeDetailDialog({
           />
         ) : (
           <div className="space-y-5">
+            {isHr && containsOwnAssignment &&
+            (request.status === "pending_manager" || request.status === "pending_hr") ? (
+              <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+                لا يمكنك اعتماد تكليف يتضمن سجلّك الوظيفي من حسابك.
+              </p>
+            ) : null}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <Field label="تاريخ العمل" value={formatDate(request.work_date)} />
               <Field label="الإدارة" value={request.departments?.name ?? "—"} />

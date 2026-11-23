@@ -85,7 +85,7 @@ export function LeaveDetailDialog({
   const canManagerAct =
     request.status === "pending_manager" &&
     !!request.manager_id && request.manager_id === myEmployeeId;
-  const canHrAct = request.status === "pending_hr" && isHr;
+  const canHrAct = request.status === "pending_hr" && isHr && request.employee_id !== myEmployeeId;
   const canDecide = canManagerAct || canHrAct;
   const mine = request.submitted_by === session.userId;
   const canEdit = isEditable(request.status) && (isHr || mine);
@@ -119,6 +119,11 @@ export function LeaveDetailDialog({
           />
         ) : (
           <div className="space-y-5">
+            {isHr && request.status === "pending_hr" && request.employee_id === myEmployeeId ? (
+              <p className="rounded-lg border border-warning/40 bg-warning/10 p-3 text-sm">
+                لا يمكنك اعتماد طلب الإجازة الخاص بك. يلزم مراجعته بواسطة مسؤول موارد بشرية آخر.
+              </p>
+            ) : null}
             <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
               <Field label="الموظف" value={request.employee?.full_name ?? "—"} />
               <Field label="كود الموظف" value={request.employee?.employee_code ?? "—"} />

@@ -11,6 +11,7 @@
 
 ## Architecture rules
 - Employee validation (codes, emails, no self/circular supervisor-manager chains, account linking) lives in the `validate_employee` DB trigger — UI writes go straight to `employees` and rely on it.
+- HR users cannot weaken their own approval route or approve their own leave/overtime; database guards enforce this while preserving decisions for other employees.
 - Admin-table auditing (employees, departments, leave_types, user_roles) is done by the `audit_row_change` trigger; don't add manual audit inserts for those writes.
 - Excel import goes through the `employees_import` RPC (validate first, then all-or-valid-only write in one transaction); supervisors/managers are resolved by email, never by ID.
 - HR reports read the `leave_report` / `overtime_report` views (HR-only, one row per employee for overtime) with server-side filters and pagination; exports reuse the same filters.

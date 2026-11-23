@@ -99,7 +99,11 @@ function LeavesPage() {
   const rows = list.data?.rows ?? [];
   const total = list.data?.total ?? 0;
   const pageCount = Math.max(1, Math.ceil(total / LEAVE_PAGE_SIZE));
-  const eligibleOnPage = useMemo(() => rows.filter((r) => r.status === "pending_hr"), [rows]);
+  const myEmployeeId = session?.employee?.id ?? null;
+  const eligibleOnPage = useMemo(
+    () => rows.filter((r) => r.status === "pending_hr" && r.employee_id !== myEmployeeId),
+    [rows, myEmployeeId],
+  );
   const allPageSelected =
     eligibleOnPage.length > 0 && eligibleOnPage.every((r) => selected.includes(r.id));
 
@@ -107,9 +111,11 @@ function LeavesPage() {
     mutationFn: (args: { action: "approve" | "reject"; reason?: string }) =>
       decideLeaveRequests(selected, args.action, args.reason),
     onSuccess: (count, args) => {
-      toast.success(
-        args.action === "approve" ? `تم اعتماد ${count} طلب` : `تم رفض ${count} طلب`,
-      );
+      if (args.action === "approve" && count < selected.length) {
+        toast.warning(`تم اعتماد ${count} طلب؛ بعض الطلبات تخص حسابك أو لم تعد معلّقة.`);
+      } else {
+        toast.success(args.action === "approve" ? `تم اعتماد ${count} طلب` : `تم رفض ${count} طلب`);
+      }
       setSelected([]);
       setBulkApprove(false);
       setBulkReject(false);
@@ -248,7 +254,7 @@ function LeavesPage() {
                     {formatDate(row.end_date)} ({row.days_count} يوم)
                   </p>
                 </button>
-                {isHr && row.status === "pending_hr" ? (
+                {isHr && row.status === "pending_hr" && row.employee_id !== myEmployeeId ? (
                   <label className="mt-3 flex items-center gap-2 text-sm">
                     <Checkbox
                       checked={selected.includes(row.id)}
@@ -303,7 +309,7 @@ function LeavesPage() {
                       <td className="p-3">
                         <Checkbox
                           checked={selected.includes(row.id)}
-                          disabled={row.status !== "pending_hr"}
+                          disabled={row.status !== "pending_hr" || row.employee_id === myEmployeeId}
                           onCheckedChange={() => toggle(row.id)}
                           aria-label="تحديد الطلب"
                         />
